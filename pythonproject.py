@@ -1,60 +1,79 @@
-class Task:
-   def _init_(self, description, due_date, priority):
-        self.description = description
-        self.due_date = due_date
-        self.priority = priority
-        self.completed = False
+import tkinter
+import tkinter.messagebox
+import pickle
+from tkinter import *
 
-class ToDoList:
-    def _init_(self):
-        self.tasks = []
+window = tkinter.Tk()
+window.title("To-Do List")
+window.minsize(width=100,height=200)
+window.maxsize(width=400,height=800)
+task_list = []
 
-    def add_task(self, task):
-        self.tasks.append(task)
 
-    def display_tasks(self):
-        for i, task in enumerate(self.tasks, 1):
-            print(f"{i}. {task.description} - Due: {task.due_date} - Priority: {task.priority}")
+def task_adding():
+    todo = task_add.get()
+    if todo != "":
+        todo_box.insert(tkinter.END,todo)
+        task_add.delete(0,tkinter.END)
+    else:
+        tkinter.messagebox.showwarning(title="ATTENTION!!",message="to add a task,please enter a task")
 
-    def mark_completed(self, task_index):
-        if 1 <= task_index <= len(self.tasks):
-            self.tasks[task_index - 1].completed = True
-            print("Task marked as completed.")
-        else:
-            print("Invalid task index.")
+def task_removing():
+    global task_list
+    task = str(todo_box.get(ANCHOR))
+    if task in task_list:
+        task.remove(task)
+        with open("tasklist.txt",'w')as taskfie:
+            for task in task_list:
+                taskfie.write(task+"\n")
+        todo_box.delete(ANCHOR)
+    else:
+        tkinter.messagebox.showwarning(title="ATTENTION!!",message="to Delete a task,please enter a task")
+def task_load():
+    try:
+        todo_task = pickle.load(open("tasks.dat","rb"))
+        list_frame.delete(0,tkinter.END)
+        for todo in tasks:
+            list_frame.inset(tkinter.END,todo)
+    except:
+        tkinter.messagebox.showwarning(title="ATTENTION!!",message="cannot find task.to update")
 
-    def update_task(self, task_index, new_description, new_due_date, new_priority):
-        if 1 <= task_index <= len(self.tasks):
-            task = self.tasks[task_index - 1]
-            task.description = new_description
-            task.due_date = new_due_date
-            task.priority = new_priority
-            print("Task updated successfully.")
-        else:
-            print("Invalid task index.")
+def task_completed():
+     completed=tkinter.messagebox.showinfo(title="CAUTION!!",message="task completed!,Done")
+    
+        
+list_frame = tkinter.Frame(window,bg="black")
+list_frame.pack()
 
-    def remove_task(self, task_index):
-        if 1 <= task_index <= len(self.tasks):
-            del self.tasks[task_index - 1]
-            print("Task removed successfully.")
-        else:
-            print("Invalid task index.")
+todo_box = tkinter.Listbox(list_frame,height=20,width=50)
+todo_box.pack(side=tkinter.LEFT)
 
-# Example usage:
-todo_list = ToDoList()
-todo_list.add_task(Task("Complete project", "2023-11-15", "High"))
-todo_list.add_task(Task("Read a book", "2023-11-20", "Medium"))
+scroller = tkinter.Scrollbar(list_frame)
+scroller.pack(side=tkinter.RIGHT,fill=tkinter.Y)
 
-todo_list.display_tasks()
+todo_box.config(yscrollcommand=scroller.set)
+#scroller.config(command=list_frame.yview)
 
-# Mark the first task as completed
-todo_list.mark_completed(1)
+task_add = tkinter.Entry(window,width=70,fg="grey")
+task_add.pack()
 
-# Update the second task
-todo_list.update_task(2, "Read two chapters", "2023-11-25", "High")
+add_task_button = tkinter.Button(window,text="click to Add Task",font=("arial",15,"bold"),bg="white",command=task_adding,fg="black",bd=6)
+add_task_button.pack()
 
-# Remove the first task
-todo_list.remove_task(1)
+remove_task_button = tkinter.Button(window,text="click to Delete Task",font=("arial",15,"bold"),bg="white",command=task_removing,fg="black",bd=6)
+remove_task_button.pack()
 
-# Display the updated tasks
-todo_list.display_tasks()
+load_task_button = tkinter.Button(window,text="Update Task",font=("arial",7,"bold"),bg="white",command=task_load,fg="black",width=11,height=3,bd=6)
+load_task_button.pack(side=tkinter.LEFT)
+  
+task_complete = tkinter.Button(window,text="Task Completed",font=("arial",7,"bold"),bg="white",command=task_completed,fg="black",width=11,height=3,bd=6)
+task_complete.pack(side=tkinter.RIGHT)
+
+
+
+
+
+window.mainloop()
+
+            
+       
